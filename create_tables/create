@@ -3,9 +3,9 @@ create table client
     client_enterprise varchar
         primary key,
     supply_center     varchar
-        not null unique,
+        not null,
     country           varchar
-        not null unique,
+        not null,
     city              varchar,
     industry          varchar
 );
@@ -13,15 +13,13 @@ create table client
 
 create table contract
 (
-    contract_number    varchar
+    contract_number   varchar not null
         primary key,
-    contract_date      varchar
-        not null unique,
-    estimated_date     varchar
-        not null unique,
-    lodgement_date     varchar,
-    director   varchar,
-    client_enterprise  varchar
+    contract_date     varchar not null,
+    estimated_date    varchar,
+    lodgement_date    varchar,
+    director          varchar,
+    client_enterprise varchar not null
         references client (client_enterprise)
 );
 
@@ -29,33 +27,29 @@ create table contract
 --这里要先建立salesman和order表格，因为model和contract_model都需要设置外键
 create table salesman
 (
-    salesman_number integer
+    salesman_number integer not null
         primary key,
-    salesman_name   varchar
-        not null unique,
-    gender          varchar
-        not null unique,
-    age             integer
-        not null unique,
+    salesman_name   varchar,
+    gender          varchar,
+    age             integer,
     mobile_phone    varchar
-        not null unique
+        unique
 );
 
 
 create table product--order用不了
 (
-    product_code varchar
+    product_code varchar not null unique
         primary key,
     product_name varchar
-        not null unique
 );
 
 
 create table product_salesman
 (
-    product_code    varchar
+    product_code    varchar not null
         references product (product_code),
-    salesman_number integer
+    salesman_number integer not null
         references salesman (salesman_number),
     primary key (product_code, salesman_number)
 );
@@ -63,11 +57,11 @@ create table product_salesman
 
 create table model
 (
-    product_model varchar
+    product_model varchar not null
         primary key,
     unit_price    integer
-        not null unique,
-    product_code  varchar
+                          not null,
+    product_code  varchar not null
         references product (product_code)
 );
 
@@ -75,10 +69,10 @@ create table model
 create table contract_model
 (
     contract_number varchar
-        references contract (contract_number),
+        references contract (contract_number) not null,
     product_model   varchar
-        references model (product_model),
+        references model (product_model)      not null,
     quantity        integer
-        not null unique,
+                                              not null,
     primary key (contract_number, product_model)
 );
