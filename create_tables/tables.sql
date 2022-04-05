@@ -1,3 +1,4 @@
+
 create table supply_center
 (
     supply_center varchar
@@ -91,3 +92,4 @@ create table contract_model
         not null unique,
     primary key (contract_number, product_model)
 );
+
