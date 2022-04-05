@@ -1,3 +1,5 @@
+drop table client,contract,contract_model,model,product ,product_salesman,salesman;
+
 create table client
 (
     client_enterprise varchar
@@ -13,7 +15,7 @@ create table client
 
 create table contract
 (
-    contract_number   varchar not null
+    contract_number   varchar
         primary key,
     contract_date     varchar not null,
     estimated_date    varchar,
@@ -27,7 +29,7 @@ create table contract
 --这里要先建立salesman和order表格，因为model和contract_model都需要设置外键
 create table salesman
 (
-    salesman_number varchar not null
+    salesman_number varchar
         primary key,
     salesman_name   varchar,
     gender          varchar,
@@ -39,7 +41,7 @@ create table salesman
 
 create table product--order用不了
 (
-    product_code varchar not null unique
+    product_code varchar
         primary key,
     product_name varchar
 );
@@ -57,7 +59,7 @@ create table product_salesman
 
 create table model
 (
-    product_model varchar not null
+    product_model varchar
         primary key,
     unit_price    integer
                           not null,
