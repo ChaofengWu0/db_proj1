@@ -26,7 +26,7 @@ create table contract
                               not null,
     director          varchar,
     client_enterprise varchar
-        references client_enterprise (client_enterprise),
+        references client_enterprise (client_enterprise)
 );
 
 
