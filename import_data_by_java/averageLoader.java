@@ -9,19 +9,6 @@ import java.sql.*;
 import java.net.URL;
 
 public class AverageLoader {
-//    static class pro_sales {
-//        String product_code;
-//        String salesman_number;
-//
-//        public pro_sales(String product_code, String salesman_number) {
-//            this.product_code = product_code;
-//            this.salesman_number = salesman_number;
-//        }
-//
-//        public pro_sales() {
-//        }
-//    }
-
     private static URL propertyURL = AverageLoader.class
             .getResource("/loader.cnf");
 
@@ -91,14 +78,14 @@ public class AverageLoader {
     }
 
 
-    private static void loadData_for_client(String client_enterprise, String supply_center, String country, String
+    private static void loadData_for_client_enterprise(String client_enterprise, String supply_center, String country, String
             city, String industry
             , HashMap<String, Integer> map_for_table_cli)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt0 = con.prepareStatement("insert into client(client_enterprise,supply_center,country,city,industry)"
+                stmt0 = con.prepareStatement("insert into client_enterprise(client_enterprise,supply_center,country,city,industry)"
                         + " values(?,?,?,?,?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
@@ -120,17 +107,15 @@ public class AverageLoader {
     }
 
 
-    private static void loadData_for_contract(String contract_number, String contract_date, String
-            estimated_delivery_date,
-                                              String lodgement_date, String director, String
-                                                      client_enterprise, HashMap<String, Integer> map_for_table_con)
+    private static void loadData_for_contract(String contract_number, String contract_date, String director, String
+            client_enterprise, HashMap<String, Integer> map_for_table_con)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt1 = con.prepareStatement("insert into contract(contract_number,contract_date,estimated_date,lodgement_date" +
+                stmt1 = con.prepareStatement("insert into contract(contract_number,contract_date" +
                         ",director,client_enterprise)"
-                        + " values(?,?,?,?,?,?)");
+                        + " values(?,?,?,?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
                 System.err.println(e.getMessage());
@@ -141,10 +126,8 @@ public class AverageLoader {
                 map_for_table_con.put(contract_number, 1);
                 stmt1.setString(1, contract_number);
                 stmt1.setString(2, contract_date);
-                stmt1.setString(3, estimated_delivery_date);
-                stmt1.setString(4, lodgement_date);
-                stmt1.setString(5, director);
-                stmt1.setString(6, client_enterprise);
+                stmt1.setString(3, director);
+                stmt1.setString(4, client_enterprise);
 //                stmt.addBatch();
                 stmt1.executeUpdate();
             }
@@ -152,22 +135,28 @@ public class AverageLoader {
     }
 
 
-    private static void loadData_for_contract_model(String contract_number, String product_model, int quantity)
+    private static void loadData_for_order(String product_code, String product_model, int quantity, String salesman_number,
+                                           String estimated_date, String lodgement_date, String contract_number)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt2 = con.prepareStatement("insert into contract_model(contract_number,product_model,quantity)"
-                        + " values(?,?,?)");
+                stmt2 = con.prepareStatement("insert into order_table(product_code,product_model,quantity,salesman_number," +
+                        "estimated_date,lodgement_date,contract_number)"
+                        + " values(?,?,?,?,?,?,?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
                 System.err.println(e.getMessage());
                 closeDB();
                 System.exit(1);
             }
-            stmt2.setString(1, contract_number);
+            stmt2.setString(1, product_code);
             stmt2.setString(2, product_model);
             stmt2.setInt(3, quantity);
+            stmt2.setString(4, salesman_number);
+            stmt2.setString(5, estimated_date);
+            stmt2.setString(6, lodgement_date);
+            stmt2.setString(7, contract_number);
 //            stmt.addBatch();
             stmt2.executeUpdate();
         }
@@ -225,43 +214,36 @@ public class AverageLoader {
     }
 
 
-    private static void loadData_for_product_salesman(String product_code, String
-            salesman_number, HashMap<String, Integer> map_for_relation_proSale, int[] test)
+    private static void loadData_for_supply_center(String supply_center, HashMap<String, Integer> map_for_supply_center)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt5 = con.prepareStatement("insert into product_salesman(product_code,salesman_number)"
-                        + " values(?,?)");
+                stmt5 = con.prepareStatement("insert into supply_center(supply_center)"
+                        + " values(?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
                 System.err.println(e.getMessage());
                 closeDB();
                 System.exit(1);
             }
-            String temp = product_code + salesman_number;
-            // 此处和其他判别重复的方法不一样，需要判两次
-            // 一次是看这个map包含还是不包含product_code,不包含可以直接加入表中
-            // 另一次是如果此map包含product_code，还要判断product_code和salesman_number这一对值是否在map中，不包含此元组则可以加入表中
-            if (map_for_relation_proSale.get(temp) == null) {
-                map_for_relation_proSale.put(temp, 1);
-                stmt5.setString(1, product_code);
-                stmt5.setString(2, salesman_number);
+            if (map_for_supply_center.get(supply_center) == null) {
+                map_for_supply_center.put(supply_center, 1);
+                stmt5.setString(1, supply_center);
                 stmt5.executeUpdate();
-//                stmt.addBatch();
             }
         }
     }
 
 
     private static void loadData_for_salesman(String salesman_number, String salesman_name, String gender,
-                                              int age, String mobile_phone, HashMap<String, Integer> map_for_table_sale)
+                                              int age, String mobile_phone, String supply_center, HashMap<String, Integer> map_for_table_sale)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt6 = con.prepareStatement("insert into salesman(salesman_number,salesman_name,gender,age,mobile_phone)"
-                        + " values(?,?,?,?,?)");
+                stmt6 = con.prepareStatement("insert into salesman(salesman_number,salesman_name,gender,age,mobile_phone,supply_center)"
+                        + " values(?,?,?,?,?,?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
                 System.err.println(e.getMessage());
@@ -275,6 +257,7 @@ public class AverageLoader {
                 stmt6.setString(3, gender);
                 stmt6.setInt(4, age);
                 stmt6.setString(5, mobile_phone);
+                stmt6.setString(6, supply_center);
                 stmt6.executeUpdate();
 //                stmt6.addBatch();
             }
@@ -359,9 +342,7 @@ public class AverageLoader {
             HashMap<String, Integer> map_for_table_cli = new HashMap<>();
             HashMap<String, Integer> map_for_table_model = new HashMap<>();
             HashMap<String, Integer> map_for_table_pro = new HashMap<>();
-            // 由于这个hashmap要用于product_salesman这个表的数据填充，所以需要辨别两个属性，i.e.(product_code和salesman_number)，
-            // 所以我用了一个hashmap作为key
-            HashMap<String, Integer> map_for_relation_ProSale = new HashMap<>();
+            HashMap<String, Integer> map_for_supply = new HashMap<>();
             HashMap<String, Integer> map_for_table_sale = new HashMap<>();
 
 
@@ -372,7 +353,7 @@ public class AverageLoader {
             Statement statement;
             if (con != null) {
                 statement = con.createStatement();
-                statement.execute("truncate table contract,client,contract_model,model,product,product_salesman,salesman");
+                statement.execute("truncate table client_enterprise,contract,model,order_table,product,salesman,supply_center");
                 statement.close();
             }
             closeDB();
@@ -381,11 +362,9 @@ public class AverageLoader {
             openDB(prop.getProperty("host"), prop.getProperty("database"),
                     prop.getProperty("user"), prop.getProperty("password"));
             infile.readLine();
-            int[] test = new int[]{1};
             while ((line = infile.readLine()) != null) {
                 parts = line.split(",");
                 if (parts.length > 1) {
-
 
                     contract_number = parts[0];
                     client_enterprise = parts[1];
@@ -408,16 +387,14 @@ public class AverageLoader {
                     age = Integer.parseInt(parts[18]);
                     mobile_phone = parts[19];
 
-                    loadData_for_client(client_enterprise, supply_center, country, city, industry, map_for_table_cli);
-                    loadData_for_contract(contract_number, contract_date, estimated_delivery_date, lodgement_date, director
-                            , client_enterprise, map_for_table_con);
-                    loadData_for_salesman(salesman_number, salesman, gender, age, mobile_phone, map_for_table_sale);
+                    loadData_for_supply_center(supply_center, map_for_supply);
+                    loadData_for_client_enterprise(client_enterprise, supply_center, country, city, industry, map_for_table_cli);
+                    loadData_for_contract(contract_number, contract_date, director, client_enterprise, map_for_table_con);
+                    loadData_for_salesman(salesman_number, salesman, gender, age, mobile_phone, supply_center, map_for_table_sale);
                     loadData_for_product(product_code, product_name, map_for_table_pro);
-                    loadData_for_product_salesman(product_code, salesman_number, map_for_relation_ProSale, test);
                     loadData_for_model(product_model, unit_price, product_code, map_for_table_model);
-                    loadData_for_contract_model(contract_number, product_model, quantity);
-
-
+                    loadData_for_order(product_code, product_model, quantity, salesman_number
+                            , estimated_delivery_date, lodgement_date, contract_number);
                     cnt++;
                 }
             }
