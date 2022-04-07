@@ -8,13 +8,14 @@ import java.sql.*;
 import java.net.URL;
 
 public class GoodLoader {
-    private static final int BATCH_SIZE = 500;
+    private static final int BATCH_SIZE =500;
     private static URL propertyURL = GoodLoader.class
             .getResource("/loader.cnf");
 
     private static Connection con = null;
     private static PreparedStatement stmt = null;
     private static PreparedStatement stmt1 = null;
+
 
 
     private static boolean verbose = false;
@@ -46,17 +47,27 @@ public class GoodLoader {
             System.err.println(e.getMessage());
             System.exit(1);
         }
+        try {
+            //导入数据
+            stmt1 = con.prepareStatement("insert into order_table(product_code,product_model,quantity,salesman_number," +
+                    "estimated_date,lodgement_date,contract_number)"
+                    + " values(?,?,?,?,?,?,?)");
+        } catch (SQLException e) {
+            System.err.println("Insert statement failed");
+            System.err.println(e.getMessage());
+            closeDB();
+            System.exit(1);
+        }
     }
 
     private static void closeDB() {
         if (con != null) {
             try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (stmt1 != null) {
-                    stmt1.close();
-                }
+
+                if (stmt != null) stmt.close();
+
+                if (stmt1 != null) stmt1.close();
+
                 con.close();
                 con = null;
             } catch (Exception e) {
@@ -65,14 +76,14 @@ public class GoodLoader {
         }
     }
 
-    private static void loadData_for_client(String client_enterprise, String supply_center, String country, String
+    private static void loadData_for_client_enterprise(String client_enterprise, String supply_center, String country, String
             city, String industry
             , HashMap<String, Integer> map_for_table_cli)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt = con.prepareStatement("insert into client(client_enterprise,supply_center,country,city,industry)"
+                stmt = con.prepareStatement("insert into client_enterprise(client_enterprise,supply_center,country,city,industry)"
                         + " values(?,?,?,?,?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
@@ -87,24 +98,21 @@ public class GoodLoader {
                 stmt.setString(3, country);
                 stmt.setString(4, city);
                 stmt.setString(5, industry);
-                stmt.addBatch();
-//                stmt.executeUpdate();
+//                stmt.addBatch();
+                stmt.executeUpdate();
             }
         }
     }
 
-
-    private static void loadData_for_contract(String contract_number, String contract_date, String
-            estimated_delivery_date,
-                                              String lodgement_date, String director, String
-                                                      client_enterprise, HashMap<String, Integer> map_for_table_con)
+    private static void loadData_for_contract(String contract_number, String contract_date, String director, String
+            client_enterprise, HashMap<String, Integer> map_for_table_con)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt = con.prepareStatement("insert into contract(contract_number,contract_date,estimated_date,lodgement_date" +
+                stmt = con.prepareStatement("insert into contract(contract_number,contract_date" +
                         ",director,client_enterprise)"
-                        + " values(?,?,?,?,?,?)");
+                        + " values(?,?,?,?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
                 System.err.println(e.getMessage());
@@ -115,34 +123,28 @@ public class GoodLoader {
                 map_for_table_con.put(contract_number, 1);
                 stmt.setString(1, contract_number);
                 stmt.setString(2, contract_date);
-                stmt.setString(3, estimated_delivery_date);
-                stmt.setString(4, lodgement_date);
-                stmt.setString(5, director);
-                stmt.setString(6, client_enterprise);
-                stmt.addBatch();
-//                stmt.executeUpdate();
+                stmt.setString(3, director);
+                stmt.setString(4, client_enterprise);
+//                stmt.addBatch();
+                stmt.executeUpdate();
             }
         }
     }
 
 
-    private static void loadData_for_contract_model(String contract_number, String product_model, int quantity)
+    private static void loadData_for_order(String product_code, String product_model, int quantity, String salesman_number,
+                                           String estimated_date, String lodgement_date, String contract_number)
             throws SQLException {
         if (con != null) {
-            try {
-                //导入数据
-                stmt = con.prepareStatement("insert into contract_model(contract_number,product_model,quantity)"
-                        + " values(?,?,?)");
-            } catch (SQLException e) {
-                System.err.println("Insert statement failed");
-                System.err.println(e.getMessage());
-                closeDB();
-                System.exit(1);
-            }
-            stmt.setString(1, contract_number);
-            stmt.setString(2, product_model);
-            stmt.setInt(3, quantity);
-            stmt.addBatch();
+
+            stmt1.setString(1, product_code);
+            stmt1.setString(2, product_model);
+            stmt1.setInt(3, quantity);
+            stmt1.setString(4, salesman_number);
+            stmt1.setString(5, estimated_date);
+            stmt1.setString(6, lodgement_date);
+            stmt1.setString(7, contract_number);
+            stmt1.addBatch();
 //            stmt.executeUpdate();
         }
     }
@@ -167,8 +169,8 @@ public class GoodLoader {
                 stmt.setString(1, product_model);
                 stmt.setInt(2, unit_price);
                 stmt.setString(3, product_code);
-                stmt.addBatch();
-//                stmt.executeUpdate();
+//                stmt.addBatch();
+                stmt.executeUpdate();
             }
         }
     }
@@ -192,50 +194,44 @@ public class GoodLoader {
                 map_for_table_pro.put(product_code, 1);
                 stmt.setString(1, product_code);
                 stmt.setString(2, product_name);
-//                stmt.executeUpdate();
-                stmt.addBatch();
+                stmt.executeUpdate();
+//                stmt4.addBatch();
             }
         }
     }
 
 
-    private static void loadData_for_product_salesman(String product_code, String
-            salesman_number, HashMap<String, Integer> map_for_relation_proSale)
+    private static void loadData_for_supply_center(String supply_center, HashMap<String, Integer> map_for_supply_center)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt1 = con.prepareStatement("insert into product_salesman(product_code,salesman_number)"
-                        + " values(?,?)");
+                stmt = con.prepareStatement("insert into supply_center(supply_center)"
+                        + " values(?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
                 System.err.println(e.getMessage());
                 closeDB();
                 System.exit(1);
             }
-            String temp = product_code + salesman_number;
-            // 此处和其他判别重复的方法不一样，需要判两次
-            // 一次是看这个map包含还是不包含product_code,不包含可以直接加入表中
-            // 另一次是如果此map包含product_code，还要判断product_code和salesman_number这一对值是否在map中，不包含此元组则可以加入表中
-            if (map_for_relation_proSale.get(temp) == null) {
-                map_for_relation_proSale.put(temp, 1);
-                stmt1.setString(1, product_code);
-                stmt1.setString(2, salesman_number);
-//                stmt.executeUpdate();
-                stmt1.addBatch();
+            if (map_for_supply_center.get(supply_center) == null) {
+                map_for_supply_center.put(supply_center, 1);
+                stmt.setString(1, supply_center);
+                stmt.executeUpdate();
+//                stmt5.addBatch();
             }
         }
     }
 
 
     private static void loadData_for_salesman(String salesman_number, String salesman_name, String gender,
-                                              int age, String mobile_phone, HashMap<String, Integer> map_for_table_sale)
+                                              int age, String mobile_phone, String supply_center, HashMap<String, Integer> map_for_table_sale)
             throws SQLException {
         if (con != null) {
             try {
                 //导入数据
-                stmt = con.prepareStatement("insert into salesman(salesman_number,salesman_name,gender,age,mobile_phone)"
-                        + " values(?,?,?,?,?)");
+                stmt = con.prepareStatement("insert into salesman(salesman_number,salesman_name,gender,age,mobile_phone,supply_center)"
+                        + " values(?,?,?,?,?,?)");
             } catch (SQLException e) {
                 System.err.println("Insert statement failed");
                 System.err.println(e.getMessage());
@@ -249,8 +245,9 @@ public class GoodLoader {
                 stmt.setString(3, gender);
                 stmt.setInt(4, age);
                 stmt.setString(5, mobile_phone);
-                stmt.addBatch();
-//                stmt.executeUpdate();
+                stmt.setString(6, supply_center);
+                stmt.executeUpdate();
+//                stmt.addBatch();
             }
         }
     }
@@ -336,9 +333,7 @@ public class GoodLoader {
             HashMap<String, Integer> map_for_table_cli = new HashMap<>();
             HashMap<String, Integer> map_for_table_model = new HashMap<>();
             HashMap<String, Integer> map_for_table_pro = new HashMap<>();
-            // 由于这个hashmap要用于product_salesman这个表的数据填充，所以需要辨别两个属性，i.e.(product_code和salesman_number)，
-            // 所以我用了一个hashmap作为key
-            HashMap<String, Integer> map_for_relation_ProSale = new HashMap<>();
+            HashMap<String, Integer> map_for_supply = new HashMap<>();
             HashMap<String, Integer> map_for_table_sale = new HashMap<>();
 
 
@@ -348,11 +343,11 @@ public class GoodLoader {
             // Empty target table
             openDB(prop.getProperty("host"), prop.getProperty("database"),
                     prop.getProperty("user"), prop.getProperty("password"));
-            Statement stmt0;
+            Statement statement;
             if (con != null) {
-                stmt0 = con.createStatement();
-                stmt0.execute("truncate table contract,client,contract_model,model,product,product_salesman,salesman");
-                stmt0.close();
+                statement = con.createStatement();
+                statement.execute("truncate table client_enterprise,contract,model,order_table,product,salesman,supply_center");
+                statement.close();
             }
             closeDB();
 
@@ -389,32 +384,40 @@ public class GoodLoader {
                     age = Integer.parseInt(parts[18]);
                     mobile_phone = parts[19];
 
-                    loadData_for_client(client_enterprise, supply_center, country, city, industry, map_for_table_cli);
-                    loadData_for_contract(contract_number, contract_date, estimated_delivery_date, lodgement_date, director
-                            , client_enterprise, map_for_table_con);
+
+//                    loadData_for_order(product_code, product_model, quantity, salesman_number
+//                            , estimated_delivery_date, lodgement_date, contract_number);
+//                    loadData_for_model(product_model, unit_price, product_code, map_for_table_model);
+//                    loadData_for_product(product_code, product_name, map_for_table_pro);
+//                    loadData_for_salesman(salesman_number, salesman, gender, age, mobile_phone, supply_center, map_for_table_sale);
+//                    loadData_for_contract(contract_number, contract_date, director, client_enterprise, map_for_table_con);
+//                    loadData_for_client_enterprise(client_enterprise, supply_center, country, city, industry, map_for_table_cli);
+//                    loadData_for_supply_center(supply_center, map_for_supply);
+
+
+                    loadData_for_supply_center(supply_center, map_for_supply);
+                    loadData_for_client_enterprise(client_enterprise, supply_center, country, city, industry, map_for_table_cli);
+                    loadData_for_contract(contract_number, contract_date, director, client_enterprise, map_for_table_con);
+                    loadData_for_salesman(salesman_number, salesman, gender, age, mobile_phone, supply_center, map_for_table_sale);
                     loadData_for_product(product_code, product_name, map_for_table_pro);
                     loadData_for_model(product_model, unit_price, product_code, map_for_table_model);
-                    loadData_for_contract_model(contract_number, product_model, quantity);
-                    loadData_for_salesman(salesman_number, salesman, gender, age, mobile_phone, map_for_table_sale);
-                    loadData_for_product_salesman(product_code, salesman_number, map_for_relation_ProSale);
+                    loadData_for_order(product_code, product_model, quantity, salesman_number
+                            , estimated_delivery_date, lodgement_date, contract_number);
 
                     cnt++;
                     if (cnt % BATCH_SIZE == 0) {
-                        stmt.executeBatch();
                         stmt1.executeBatch();
-                        stmt.clearBatch();
                         stmt1.clearBatch();
+
                     }
                 }
 
 
             }
             if (cnt % BATCH_SIZE != 0) {
-                stmt.executeBatch();
                 stmt1.executeBatch();
             }
             con.commit();
-            stmt.close();
             stmt1.close();
             closeDB();
             end = System.currentTimeMillis();
@@ -426,7 +429,6 @@ public class GoodLoader {
             System.err.println("SQL error: " + se.getMessage());
             try {
                 con.rollback();
-                stmt.close();
                 stmt1.close();
             } catch (Exception e2) {
             }
@@ -436,7 +438,7 @@ public class GoodLoader {
             System.err.println("Fatal error: " + e.getMessage());
             try {
                 con.rollback();
-                stmt.close();
+//                stmt0.close();
                 stmt1.close();
             } catch (Exception e2) {
             }
