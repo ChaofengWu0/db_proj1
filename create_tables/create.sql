@@ -1,3 +1,5 @@
+drop table supply_center,client_enterprise,contract,model,product,salesman,order_table
+;
 create table supply_center
 (
     supply_center varchar
@@ -23,7 +25,7 @@ create table contract
     contract_number   varchar
         primary key,
     contract_date     varchar
-                              not null,
+        not null,
     director          varchar,
     client_enterprise varchar
         references client_enterprise (client_enterprise)
@@ -52,7 +54,7 @@ create table product
     product_code varchar
         primary key,
     product_name varchar
-        not null unique
+        not null
 );
 
 
@@ -81,4 +83,4 @@ create table order_table
                             not null references salesman (salesman_number),
     estimated_date  varchar,
     lodgement_date  varchar
-)
+);
