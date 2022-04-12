@@ -10,7 +10,6 @@
 #include "fstream"
 #include "ostream"
 #include "sstream"
-#include "time.h"
 
 using namespace std;
 
@@ -52,29 +51,30 @@ void save(vector<order *> &);
 int main() {
     // 用来装所有order的表
     vector<order *> orders;
-    const string data_address_origin = R"(C:\Users\ll\Desktop\University\dataBase\proj\db_proj1\order_table_origin.csv)";
+    const string data_address_origin = R"(C:\Users\ll\Desktop\University\dataBase\proj\db_proj1\_.csv)";
     insert_(orders, data_address_origin, "order_table_origin", true);
     // 在这里，已经把所有的存在csv中的数据转换成了对象存放在orders这个vector中
 
-    // 这两行是用来insert数据的
+    //// 这两行是用来insert数据的
     {
-//        clock_t start_time = clock();
-//        const string data_address_add = R"(C:\Users\ll\Desktop\University\dataBase\proj\db_proj1\order_table_toadd.csv)";
-//        int total_data = insert_(orders, data_address_add, "order_table_toadd", false);
-//        clock_t end_time = clock();
-//        double consume_time = (double) (end_time - start_time) / CLOCKS_PER_SEC;
-//        printf("insert %d data,it consume %ds", total_data, consume_time);
+        clock_t start_time = clock();
+        const string data_address_add = R"(C:\Users\ll\Desktop\University\dataBase\proj\db_proj1\order_table_toadd.csv)";
+        int total_data = insert_(orders, data_address_add, "order_table_toadd", false);
+        clock_t end_time = clock();
+        double consume_time = (double) (end_time - start_time) / CLOCKS_PER_SEC;
+        printf("insert %d data,it consume %f s", total_data, consume_time);
     }
 
-    // insert解决
-    
-    // 
+    //// insert解决
 
 
-//    save(orders);
+    //
+
+
+    save(orders);
 }
 
-int insert(vector<order *> &table, const string &address, string name, bool is_origin) {
+int insert_(vector<order *> &table, const string &address, string name, bool is_origin) {
     int cnt = table.size();
     string now_data;
     ifstream get_content;
@@ -83,14 +83,11 @@ int insert(vector<order *> &table, const string &address, string name, bool is_o
         printf("wrong in %d,because of the file %s can't open\n", __LINE__, &name);
         abort();
     }
-    get_content.close();
-    vector<string> temp;
+    int cnt_for_data = 0;
     while (getline(get_content, now_data)) {
-        temp.push_back(now_data);
-    }
-    string data[8];
-    for (auto &iterator: temp) {
-        stringstream split_data(iterator);
+        cnt_for_data++;
+        string data[8];
+        stringstream split_data(now_data);
         getline(split_data, data[0], ',');
         getline(split_data, data[1], ',');
         getline(split_data, data[2], ',');
@@ -113,7 +110,8 @@ int insert(vector<order *> &table, const string &address, string name, bool is_o
         }
         table.push_back(new order(order_num, data[1], data[2], quantity, data[4], data[5], data[6], data[7]));
     }
-    return temp.size();
+    get_content.close();
+    return cnt_for_data;
 }
 
 void save(vector<order *> &final_table) {
