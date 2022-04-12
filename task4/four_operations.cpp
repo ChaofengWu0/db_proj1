@@ -40,11 +40,13 @@ struct order {
 
 int insert_(vector<order *> &, const string &, string, bool);
 
-void delete_(vector<order *> &);
+void delete_();
 
 void update_();
 
-void select_();
+void select_(vector<order *> &, vector<order *> &);
+
+void print_sel(vector<order *> &selected);
 
 void save(vector<order *> &);
 
@@ -56,22 +58,75 @@ int main() {
     // 在这里，已经把所有的存在csv中的数据转换成了对象存放在orders这个vector中
 
     //// 这两行是用来insert数据的
-    {
-        clock_t start_time = clock();
-        const string data_address_add = R"(C:\Users\ll\Desktop\University\dataBase\proj\db_proj1\order_table_toadd.csv)";
-        int total_data = insert_(orders, data_address_add, "order_table_toadd", false);
-        clock_t end_time = clock();
-        double consume_time = (double) (end_time - start_time) / CLOCKS_PER_SEC;
-        printf("insert %d data,it consume %f s", total_data, consume_time);
+
+    cout << "The file has been opened and it already has 20000 orders in it\n"
+            "Please choose the operation\n"
+            "i: insert\n"
+            "d: delete\n"
+            "u: update\n"
+            "s: select\n"
+            "save: save\n"
+            "q:   quit\n";
+    clock_t start_time = clock();
+    string choice;
+    int total_insert_data = 0;
+    while ((choice = cin.get()) != "q") {
+        cin.get();
+        if (choice == "save") {
+            save(orders);
+            clock_t end_time = clock();
+            double consume_time = (double) (end_time - start_time) / CLOCKS_PER_SEC;
+//            printf("insert %d data,it consume %f s", total_data, consume_time);
+            break;
+        }
+        switch (choice.at(0)) {
+            case 'i': {
+                // 这里暂时没有让用户自定义
+                const string data_address_add = R"(C:\Users\ll\Desktop\University\dataBase\proj\db_proj1\order_table_toadd.csv)";
+                total_insert_data += insert_(orders, data_address_add, "order_table_toadd", false);
+                break;
+            }
+            case 'd': {
+
+                break;
+            }
+            case 'u': {
+                break;
+            }
+            case 's': {
+                cout << "Please input the most amount of the orders you want to select(smaller than 100000)" << endl;
+                int N;
+                cin >> N;
+                vector<order *> selected(N);
+                clock_t sel_time_start = clock();
+                select_(orders, selected);
+                print_sel(selected);
+                clock_t sel_time_end = clock();
+                double total_time = (double) (sel_time_end - sel_time_start) / CLOCKS_PER_SEC;
+                printf("The total time for this operation is %f s", total_time);
+                break;
+            }
+        }
+
+        //// insert解决
+        cout << "please input the " << endl;
     }
+}
 
-    //// insert解决
+void print_sel(vector<order *> &selected) {
+    bool is_break = false;
+    for (int i = 0; i < selected.size(); ++i) {
+        if (selected[i] == nullptr) {
+            is_break = true;
+            cout << "This is the end of this select operation" << endl;
+            break;
+        }
 
+    }
+}
 
-    //
-
-
-    save(orders);
+void select_(vector<order *> &src, vector<order *> &selected) {
+    
 }
 
 int insert_(vector<order *> &table, const string &address, string name, bool is_origin) {
@@ -129,11 +184,3 @@ void save(vector<order *> &final_table) {
     }
     write.close();
 }
-
-
-
-
-
-
-
-
