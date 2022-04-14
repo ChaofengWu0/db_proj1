@@ -92,14 +92,22 @@ int main() {
     while ((choice = cin.get()) != "q") {
         cin.get();
         switch (choice[0]) {
-            case 'i':
+            case 'i': {
                 pr = 1;
-            case 'd':
+                break;
+            }
+            case 'd': {
                 pr = 2;
-            case 'u':
+                break;
+            }
+            case 'u': {
                 pr = 3;
-            case 's':
+                break;
+            }
+            case 's': {
                 pr = 4;
+                break;
+            }
         }
         if (choice == "save") {
             clock_t start_time = clock();
@@ -108,22 +116,29 @@ int main() {
             time_for_save = (double) (end_time - start_time) / CLOCKS_PER_SEC;
             switch (pr) {
                 // 增
-                case 1:
+                case 1: {
                     printf("The total number of insert is %d which cost %f s\n", total_insert,
                            time_for_insert + time_for_save);
+                    break;
+                }
                     // 删
-                case 2:
+                case 2: {
                     printf("The total number of delete is %d which cost %f s\n", total_delete,
                            time_for_del + time_for_save);
+                    break;
+                }
                     // 改
-                case 3:
+                case 3: {
                     printf("The total number of update is %d which cost %f s\n", total_update,
                            time_for_update + time_for_save);
+                    break;
+                }
                     // 查
                 case 4: {
                     printf("The total number of select is %d which cost %f s\n", total_select,
                            time_for_select + time_for_save);
                     printf("The corresponding time to output the data cost %f s\n", time_for_select + time_for_print);
+                    break;
                 }
             }
             break;
