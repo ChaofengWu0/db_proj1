@@ -11,7 +11,6 @@
 #include "sstream"
 #include "queue"
 
-
 using namespace std;
 
 struct order {
@@ -58,7 +57,11 @@ bool check_for_now_order(order *,
                          const string &salesman_number_cons
 );
 
-bool check_for_input_code(const string &str);
+bool check_for_code(const string &);
+
+bool check_for_salesman_number(const string &);
+
+bool check_for_contract(const string &);
 
 int print_sel(vector<order *> &selected, double &);
 
@@ -74,38 +77,74 @@ int main() {
     double time_for_update = 0;
     double time_for_print = 0;
     double time_for_select = 0;
+    double time_for_save = 0;
+    int total_insert = 0;
+    int total_delete = 0;
+    int total_update = 0;
+    int total_select = 0;
+
     insert_(orders, data_address_origin, "order_table_origin", true, no_use);
     // 在这里，已经把所有的存在csv中的数据转换成了对象存放在orders这个vector中
-
-    //// 这两行是用来insert数据的
-
     cout << "The file has been opened and it already has 20000 orders in it\n";
     print_info(true);
     string choice;
-    int total_insert_data = 0;
+    int pr = 0;
     while ((choice = cin.get()) != "q") {
         cin.get();
+        switch (choice[0]) {
+            case 'i':
+                pr = 1;
+            case 'd':
+                pr = 2;
+            case 'u':
+                pr = 3;
+            case 's':
+                pr = 4;
+        }
         if (choice == "save") {
+            clock_t start_time = clock();
             save(orders);
+            clock_t end_time = clock();
+            time_for_save = (double) (end_time - start_time) / CLOCKS_PER_SEC;
+            switch (pr) {
+                // 增
+                case 1:
+                    printf("The total number of insert is %d which cost %f s\n", total_insert,
+                           time_for_insert + time_for_save);
+                    // 删
+                case 2:
+                    printf("The total number of delete is %d which cost %f s\n", total_delete,
+                           time_for_del + time_for_save);
+                    // 改
+                case 3:
+                    printf("The total number of update is %d which cost %f s\n", total_update,
+                           time_for_update + time_for_save);
+                    // 查
+                case 4: {
+                    printf("The total number of select is %d which cost %f s\n", total_select,
+                           time_for_select + time_for_save);
+                    printf("The corresponding time to output the data cost %f s\n", time_for_select + time_for_print);
+                }
+            }
             break;
         }
         switch (choice.at(0)) {
             case 'i': {
                 // 这里暂时没有让用户自定义,只能insert指定目录的数据
                 const string data_address_add = R"(C:\Users\ll\Desktop\University\dataBase\proj\db_proj1\order_table_toadd.csv)";
-                total_insert_data += insert_(orders, data_address_add, "order_table_toadd", false, time_for_insert);
+                total_insert += insert_(orders, data_address_add, "order_table_toadd", false, time_for_insert);
                 break;
             }
             case 'd': {
                 double temp_del_time = 0.0;
-                delete_(orders, temp_del_time);
+                total_delete += delete_(orders, temp_del_time);
                 time_for_del += temp_del_time;
                 print_info(true);
                 break;
             }
             case 'u': {
                 double temp_update_time = 0.0;
-                update_(orders, temp_update_time);
+                total_update += update_(orders, temp_update_time);
                 time_for_update += temp_update_time;
                 print_info(true);
                 break;
@@ -113,15 +152,15 @@ int main() {
             case 's': {
                 vector<order *> selected;
                 double time_for_sel = 0;
-                select_(orders, selected, time_for_sel);
+                total_select += select_(orders, selected, time_for_sel);
                 double time_for_print_this = 0;
                 print_sel(selected, time_for_print_this);
-                printf("This is the time for this select %f s\n"
-                       "This is the time for this print%f s\n"
-                       "This is the total time for this operation %f s\n", time_for_sel, time_for_print_this,
-                       time_for_sel + time_for_print_this);
-                time_for_select += time_for_sel;
-                time_for_print += time_for_print_this;
+//                printf("This is the time for this select %f s\n"
+//                       "This is the time for this print%f s\n"
+//                       "This is the total time for this operation %f s\n", time_for_sel, time_for_print_this,
+//                       time_for_sel + time_for_print_this);
+//                time_for_select += time_for_sel;
+//                time_for_print += time_for_print_this;
                 print_info(true);
                 break;
             }
@@ -178,15 +217,6 @@ bool check_for_now_order(order *now_order, const int order_number_cons[],
     if (quantity_cons[0] != -1 &&
         (now_quantity < quantity_cons[0] || now_quantity > quantity_cons[1]))
         return false;
-    return true;
-}
-
-
-bool check_for_input_code(const string &str) {
-    for (char i: str) {
-        if ((i >= 65 && i <= 90) || (i >= 48 && i <= 57)) {
-        } else return false;
-    }
     return true;
 }
 
@@ -272,7 +302,71 @@ int update_(vector<order *> &src, double &time_for_update) {
     vector<order *> wanted;
     select_(src, wanted, time_for_update);
     // wanted里面含有想要修改的order,接下来是想要修改的内容
-    
+    int num;
+    string code;
+    string model;
+    int quantity;
+    string contract;
+    string salesman_num;
+    string estimated_date;
+    string lodgement_date;
+    cout << "Please input the changes you want.You need to input your thoughts in order\n"
+            "for the first and forth elements,if you don't want to change them,you can input a number<0\n"
+            "for other elements,if you don't want to change them,you can input \"null\" \n"
+            "The order is:\n"
+            "num  code  model  quantity  contract  salesman_number  estimated_date  loadgement_date" << endl;
+    cin >> num >> code >> model >> quantity >> contract >> salesman_num >> estimated_date >> lodgement_date;
+    clock_t start_time = clock();
+    for (auto &element: wanted) {
+        if (num >= 0)element->order_number = num;
+
+        if (code != "null" && check_for_code(code))element->product_code = code;
+        else if (code != "null")abort();
+
+        if (model != "null") element->product_model = model;
+        if (quantity >= 0) element->quantity = quantity;
+
+        if (contract != "null" && check_for_contract(contract)) element->contract_number = contract;
+        else if (contract != "null") abort();
+
+        if (salesman_num != "null" && check_for_salesman_number(salesman_num)) element->salesman_number = salesman_num;
+        else if (salesman_num != "null") abort();
+
+        if (estimated_date != "null") element->estimated_date = estimated_date;
+        if (lodgement_date != "null") element->lodgement_date = lodgement_date;
+    }
+    cin.get();
+    clock_t end_time = clock();
+    time_for_update = (double) (end_time - start_time) / CLOCKS_PER_SEC;
+    return wanted.size();
+}
+
+bool check_for_contract(const string &str) {
+    if (str.size() != 10) return false;
+    for (int i = 0; i < str.size(); ++i) {
+        if (i == 0 && str[0] != 'C') return false;
+        if (i == 1 && str[1] != 'S')return false;
+        if (i == 2 && str[2] != 'E') return false;
+        if (str[i] > 57 || str[i] < 48)return false;
+    }
+    return true;
+}
+
+bool check_for_code(const string &str) {
+    if (str.size() != 7)return false;
+    for (char i: str) {
+        if ((i >= 65 && i <= 90) || (i >= 48 && i <= 57)) {
+        } else return false;
+    }
+    return true;
+}
+
+bool check_for_salesman_number(const string &str) {
+    if (str.size() != 8)return false;
+    for (auto &i: str) {
+        if (i > 57 || i < 48)return false;
+    }
+    return true;
 }
 
 int print_sel(vector<order *> &selected, double &print_time) {
@@ -316,18 +410,8 @@ int select_(vector<order *> &src, vector<order *> &selected, double &sel_time) {
            "Or you don't want any constrains please input null\n");
     string temp_code;
     cin >> temp_code;
-    if (temp_code != "null") {
-        if (temp_code.size() != 7) {
-            cout << "Please make sure that the input is 7 chars in length\n";
-            abort();
-        }
-        if (!check_for_input_code(temp_code)) {
-            cout << "Please make sure that the content of input meets the requirement\n";
-            abort();
-        }
-        assert(temp_code.size() == 7);
-        assert(check_for_input_code(temp_code));
-    }
+    if (temp_code != "null" && !check_for_code(temp_code))abort();
+
     product_code_cons = temp_code;
     // product_model
     printf("Please input the product model you want to select\n"
@@ -346,10 +430,13 @@ int select_(vector<order *> &src, vector<order *> &selected, double &sel_time) {
     printf("Please input the contract number you want to select\n"
            "Or you don't want any constrains please input null\n");
     cin >> contract_number_cons;
+    if (contract_number_cons != "null" && !check_for_contract(contract_number_cons)) abort();
+
     // salesman_number
     printf("Please input the salesman number you want to select\n"
            "Or you don't want any constrains please input null\n");
     cin >> salesman_number_cons;
+    if (salesman_number_cons != "null" && !check_for_salesman_number(salesman_number_cons)) abort();
     cin.get();
     clock_t start_time = clock();
     for (auto now_order: src) {
