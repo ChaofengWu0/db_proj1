@@ -20,6 +20,7 @@ public class GoodLoader {
     private static PreparedStatement stmt4 = null;
     private static PreparedStatement stmt5 = null;
     private static PreparedStatement stmt6 = null;
+    private static Statement statement = null;
 
 
     private static boolean verbose = false;
@@ -371,10 +372,12 @@ public class GoodLoader {
             // Empty target table
             openDB(prop.getProperty("host"), prop.getProperty("database"),
                     prop.getProperty("user"), prop.getProperty("password"));
-            Statement statement;
+//            Statement statement;
             if (con != null) {
                 statement = con.createStatement();
-                statement.execute("truncate table client_enterprise,contract,model,order_table,product,salesman,supply_center");
+                statement.execute("truncate table client_enterprise " +
+                        ",contract,model,order_table,product,salesman,supply_center");
+                con.commit();
                 statement.close();
             }
             closeDB();
