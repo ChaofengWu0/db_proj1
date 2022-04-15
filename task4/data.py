@@ -1,10 +1,10 @@
 import csv
 import random
 
-file = open(r"random_data.csv", "w", encoding="utf-8", newline='')
+file = open(r"random_data_500W.csv", "w", encoding="utf-8", newline='')
 writer = csv.writer(file)
-iterator = 20000
-total_data_num = 1000000 + iterator
+iterator = 1
+total_data_num = 5000000
 data = []
 while iterator < total_data_num:
     order_number = iterator
@@ -44,12 +44,12 @@ while iterator < total_data_num:
     # quantity
     quantity = random.randint(1, 1000)
     # contract_number
-    contract_number = 'CSE'
-    cnt_for_contract = 7
+    contract_number = "CSE"
+    cnt_for_contract = 6
     while cnt_for_contract > 0:
         cnt_for_contract = cnt_for_contract - 1
         d = random.randint(48, 57)
-        contract_number + chr(d)
+        contract_number += chr(d)
     # salesman_number
     salesman_number = random.randint(10000000, 99999999)
     # estimated_date
@@ -83,7 +83,7 @@ while iterator < total_data_num:
     else:
         day_e = random.randint(1, 31)
         if day_e < 10:
-            estimated_date = estimated_date + '-'
+            estimated_date = estimated_date + '0'
         estimated_date = estimated_date + str(day_e)
 
     # lodgement_date
@@ -127,4 +127,5 @@ while iterator < total_data_num:
             estimated_date, lodgement_date]
     iterator = iterator + 1
     writer.writerow(data)
+print("The program is over")
 file.close()
