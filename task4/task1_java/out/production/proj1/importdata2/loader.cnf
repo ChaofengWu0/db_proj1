@@ -1,0 +1,4 @@
+host = localhost
+database = cs3072
+user = checker
+password =123456
